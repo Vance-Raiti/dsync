@@ -1,0 +1,54 @@
+#!/bin/bash
+
+LOCAL=/home/vraiti/.local
+URL=quay.io/vraiti/dsync
+VAR=/var/lib/dsync
+
+export REGISTRY_AUTH_FILE=$LOCAL/dsync/auth.json
+
+if [ ! -d $LOCAL/dsync ]; then
+	mkdir -p $LOCAL/dsync
+fi
+tar cf $VAR/working.tar -C $LOCAL dsync
+
+podman artifact pull $URL
+podman artifact extract $URL $VAR/remote.tar
+
+if [ ! -f $VAR/local.tar ]; then
+	cp $VAR/working.tar $VAR/local.tar
+fi
+
+lsha=$(sha256sum $VAR/local.tar | awk '{print $1}')
+wsha=$(sha256sum $VAR/working.tar | awk '{print $1}')
+rsha=$(sha256sum $VAR/remote.tar | awk '{print $1}')
+
+# wsha == lsha == rsha: no updates
+# wsha == lsha != rsha: pull
+# wsha != lsha == rsha: push
+# wsha != lsha != rsha: conflict
+# wsha == rsha != lsha: undefined (conflict)
+
+if [[ "$wsha" == "$lsha" && "$lsha" == "$rsha" ]]; then
+	echo "INFO: Already synchronized. Doing nothing"
+
+elif [[ "$wsha" == "$lsha" && "$lsha" != "$rsha" ]]; then
+	echo "INFO: Found updated remote. Pulling"
+	cp $VAR/remote.tar $VAR/local.tar
+	tar xf $VAR/local.tar -C $LOCAL
+	chown -R vraiti:vraiti $LOCAL/dsync
+
+elif [[ "$wsha" != "$lsha" && "$lsha" == "$rsha" ]]; then
+	echo "INFO: Found updated working. Pushing"
+	cp $VAR/working.tar $VAR/local.tar
+	podman artifact rm $URL
+	podman artifact add $URL $VAR/local.tar
+	podman artifact push $URL
+
+elif [[ "$wsha" != "$lsha" && "$lsha" != "$rsha" ]]; then
+	echo "ERROR: Found updated working and remote. Please synchronize manually" >&2
+	exit 1
+
+elif [[ "$wsha" == "$rsha" && "$rsha" != "$lsha" ]]; then
+	echo "CONFLICT: local and remote do not match when working and remote do. Please synchronize manually" >&2
+	exit 1
+fi

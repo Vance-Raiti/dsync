@@ -1,0 +1,6 @@
+[Unit]
+Description=Run dsync hourly
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dsync

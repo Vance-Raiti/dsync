@@ -1,0 +1,13 @@
+[Unit]
+Description=Sync profile directory between work and home computer
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/local/bin/dsync
+ExecStop=/usr/local/bin/dsync
+
+[Install]
+WantedBy=multi-user.target
