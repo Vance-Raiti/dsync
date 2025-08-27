@@ -1,5 +1,5 @@
 [Unit]
-Description=Sync profile directory between work and home computer
+Description=Sync profile directory between computers
 DefaultDependencies=no
 Before=shutdown.target reboot.target halt.target
 

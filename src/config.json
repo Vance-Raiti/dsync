@@ -1,0 +1,11 @@
+{
+	"/home/vraiti/.local/dsync": {
+		"user": "vraiti",
+		"url": "quay.io/vraiti/dsync"
+	},
+
+	"/home/vraiti/.local/etc": {
+		"user" :"vraiti",
+		"url": "quay.io/vraiti/etc"
+	}
+}
