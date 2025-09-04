@@ -12,7 +12,6 @@ Source1: dsync.service
 Source2: dsync-hourly.service
 Source3: dsync-hourly.timer
 Source4: dsync
-Source5: dsync-sync
 
 BuildRequires: git-core
 BuildRequires: systemd
@@ -35,7 +34,6 @@ install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/dsync-hourly.service
 install -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/dsync-hourly.timer
 
 install -m 755 %{SOURCE4} %{buildroot}%{_usr}/bin
-install -m 755 %{SOURCE5} %{buildroot}%{_usr}/bin
 
 %files
 %{_unitdir}/dsync.service
@@ -43,7 +41,6 @@ install -m 755 %{SOURCE5} %{buildroot}%{_usr}/bin
 %{_unitdir}/dsync-hourly.timer
 
 %{_usr}/bin/dsync
-%{_usr}/bin/dsync-sync
 
 %post
 %systemd_post dsync.service dsync-hourly.service dsync-hourly.timer
